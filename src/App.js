@@ -197,7 +197,7 @@ function BudgetBuilderGame({ userData, setUserData }) {
     { id: 'food', name: 'Food & Groceries', icon: ShoppingCart, minAmount: 300, maxAmount: 500, priority: 'essential' },
     { id: 'insurance', name: 'Insurance', icon: Shield, minAmount: 150, maxAmount: 250, priority: 'essential' },
     { id: 'entertainment', name: 'Entertainment', icon: Zap, minAmount: 50, maxAmount: 200, priority: 'want' },
-    { id: 'movies', name: 'Movie Tickets', icon: '🎬', minAmount: 20, maxAmount: 80, priority: 'want' },
+    { id: 'movies', name: 'Movie Tickets', icon: Target, minAmount: 20, maxAmount: 80, priority: 'want' },
     { id: 'emergency', name: 'Emergency Fund', icon: AlertTriangle, minAmount: 100, maxAmount: 500, priority: 'savings' },
     { id: 'savings', name: 'Long-term Savings', icon: TrendingUp, minAmount: 100, maxAmount: 600, priority: 'savings' },
   ];
@@ -519,7 +519,6 @@ function BudgetBuilderGame({ userData, setUserData }) {
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {requirements.filter(req => !allocations[req.id]).map(req => {
                 const Icon = req.icon;
-                const isIcon = typeof Icon === 'function';
                 return (
                   <div
                     key={req.id}
@@ -529,7 +528,7 @@ function BudgetBuilderGame({ userData, setUserData }) {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {isIcon ? <Icon className="w-4 h-4 text-gray-600" /> : <span>{Icon}</span>}
+                        <Icon className="w-4 h-4 text-gray-600" />
                         <span className="text-sm font-medium">{req.name}</span>
                       </div>
                       <span className="text-xs text-gray-500">
@@ -559,11 +558,10 @@ function BudgetBuilderGame({ userData, setUserData }) {
                       .filter(([key, val]) => val.category === category.id)
                       .map(([key, val]) => {
                         const Icon = val.requirement.icon;
-                        const isIcon = typeof Icon === 'function';
                         return (
                           <div key={key} className="bg-white rounded p-1 flex items-center justify-between text-sm">
                             <div className="flex items-center gap-1">
-                              {isIcon ? <Icon className="w-3 h-3" /> : <span className="text-xs">{Icon}</span>}
+                              <Icon className="w-3 h-3" />
                               <span className="text-xs">{val.requirement.name}</span>
                             </div>
                             <div className="flex items-center gap-1">
