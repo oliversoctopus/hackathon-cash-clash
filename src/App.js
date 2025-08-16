@@ -453,7 +453,7 @@ function InvestingGame({ userData, setUserData }) {
       id: 'risky', 
       name: 'Growth Stocks', 
       avgReturn: 'High variance',
-      description: '40% chance: +30%, 40% chance: -10%, 20% chance: -75%',
+      description: '30% chance: +40%, 35% chance: +10%, 30% chance: -20%, 5% chance: -75%',
       risk: 'High risk', 
       color: 'bg-red-500' 
     },
@@ -496,18 +496,21 @@ function InvestingGame({ userData, setUserData }) {
     newValue += indexReturn;
     returns.index = Math.round(indexReturnRate * 100);
     
-    // Growth Stocks - High volatility
+    // Growth Stocks - High volatility (more realistic distribution)
     const riskyAmount = totalValue * (portfolioPercentages.risky / 100);
     const riskyRandom = Math.random();
     let riskyReturnRate;
-    if (riskyRandom < 0.4) {
-      riskyReturnRate = 0.30; // 40% chance of +30%
-      events.push('🚀 Tech boom: Growth stocks surge 30%!');
-    } else if (riskyRandom < 0.8) {
-      riskyReturnRate = -0.10; // 40% chance of -10%
-      events.push('⚠️ Growth stocks dip 10%');
+    if (riskyRandom < 0.30) {
+      riskyReturnRate = 0.40; // 30% chance of +40%
+      events.push('🚀 Growth stocks surge 40%!');
+    } else if (riskyRandom < 0.65) {
+      riskyReturnRate = 0.10; // 35% chance of +10%
+      events.push('📈 Growth stocks up 10%');
+    } else if (riskyRandom < 0.95) {
+      riskyReturnRate = -0.20; // 30% chance of -20%
+      events.push('📉 Growth stocks down 20%');
     } else {
-      riskyReturnRate = -0.75; // 20% chance of -75%
+      riskyReturnRate = -0.75; // 5% chance of -75%
       events.push('💥 Market crash: Growth stocks plummet 75%!');
     }
     const riskyReturn = riskyAmount * (1 + riskyReturnRate);
@@ -553,11 +556,14 @@ function InvestingGame({ userData, setUserData }) {
       const riskyAmount = currentValue * (portfolioPercentages.risky / 100);
       const riskyRandom = Math.random();
       let riskyReturnRate;
-      if (riskyRandom < 0.4) {
-        riskyReturnRate = 0.30;
-        events.push('Tech boom');
-      } else if (riskyRandom < 0.8) {
-        riskyReturnRate = -0.10;
+      if (riskyRandom < 0.30) {
+        riskyReturnRate = 0.40;
+        events.push('Growth surge');
+      } else if (riskyRandom < 0.65) {
+        riskyReturnRate = 0.10;
+      } else if (riskyRandom < 0.95) {
+        riskyReturnRate = -0.20;
+        events.push('Growth decline');
       } else {
         riskyReturnRate = -0.75;
         events.push('Market crash!');
