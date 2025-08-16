@@ -840,12 +840,13 @@ function MoneyMatchGame({ userData, setUserData }) {
       setUserChoice(null);
     } else {
       setGameComplete(true);
-      const finalScore = results.filter(r => r.correct).length * 100 + 
-                        (scenarios[currentCard].correct === userChoice ? 100 : 0);
+      // Fix: Calculate final score correctly (don't add current card twice)
+      const correctCount = results.filter(r => r.correct).length + (scenarios[currentCard].correct === userChoice ? 1 : 0);
+      const finalScore = correctCount * 100;
       setUserData(prev => ({
         ...prev,
         totalXP: prev.totalXP + finalScore,
-        level: Math.floor((prev.totalXP + finalScore) / 100) + 1,
+        level: Math.floor((prev.totalXP + finalScore) / 1000) + 1,
       }));
     }
   };
@@ -864,7 +865,9 @@ function MoneyMatchGame({ userData, setUserData }) {
     return <div>Loading...</div>;
   }
 
-  const correctCount = results.filter(r => r.correct).length;
+  // Fix: Include the last card's result in the count
+  const correctCount = results.filter(r => r.correct).length + 
+    (showResult && userChoice === scenarios[currentCard].correct ? 1 : 0);
   const totalScore = correctCount * 100;
 
   if (gameComplete) {
@@ -1002,6 +1005,7 @@ function InvestingGame({ userData, setUserData }) {
   const [gameState, setGameState] = useState('setup');
   const [lastYearReturns, setLastYearReturns] = useState({});
   const [yearlyEvents, setYearlyEvents] = useState([]);
+  const [xpAwarded, setXpAwarded] = useState(false);
 
   const investments = [
     { 
@@ -1037,6 +1041,43 @@ function InvestingGame({ userData, setUserData }) {
     if (total <= 100) {
       setPortfolioPercentages(newPercentages);
     }
+  };
+
+  const calculateAndAwardXP = () => {
+    if (!xpAwarded && year >= 10) {
+      const returnPercentage = ((totalValue / 1000) - 1) * 100;
+      let xpEarned = 0;
+      
+      // Award XP based on returns achieved
+      if (returnPercentage < 0) {
+        xpEarned = 50; // Participation points for loss
+      } else if (returnPercentage <= 20) {
+        xpEarned = 100; // Broke even or small gain
+      } else if (returnPercentage <= 50) {
+        xpEarned = 200; // Modest returns
+      } else if (returnPercentage <= 100) {
+        xpEarned = 300; // Good returns
+      } else if (returnPercentage <= 200) {
+        xpEarned = 500; // Great returns
+      } else {
+        xpEarned = 750; // Exceptional returns
+      }
+      
+      // Bonus XP for reaching 50 years
+      if (year === 50) {
+        xpEarned += 250;
+      }
+      
+      setUserData(prev => ({
+        ...prev,
+        totalXP: prev.totalXP + xpEarned,
+        level: Math.floor((prev.totalXP + xpEarned) / 1000) + 1,
+      }));
+      
+      setXpAwarded(true);
+      return xpEarned;
+    }
+    return 0;
   };
 
   const simulateYear = () => {
@@ -1095,6 +1136,11 @@ function InvestingGame({ userData, setUserData }) {
     
     const eventText = events.length > 0 ? events.join(', ') : 'Steady growth';
     setHistory([...history, { year: year + 1, total: newValue, event: eventText }]);
+    
+    // Check if we should award XP
+    if (year + 1 >= 10) {
+      calculateAndAwardXP();
+    }
   };
 
   const simulateFiveYears = () => {
@@ -1151,18 +1197,28 @@ function InvestingGame({ userData, setUserData }) {
     setTotalValue(currentValue);
     setYear(currentYear);
     setHistory(newHistory);
-    setYearlyEvents([`Simulated 5 years - ending value: $${Math.round(currentValue)}`]);
+    setYearlyEvents([`Simulated 5 years - ending value: ${Math.round(currentValue)}`]);
+    
+    // Check if we should award XP
+    if (currentYear >= 10) {
+      calculateAndAwardXP();
+    }
   };
 
   const startSimulation = () => {
     const total = Object.values(portfolioPercentages).reduce((a, b) => a + b, 0);
     if (total === 100) {
       setGameState('running');
+      setXpAwarded(false); // Reset XP awarded flag when starting new simulation
     }
   };
 
   const resetAllocation = () => {
     setGameState('setup');
+    setYear(0);
+    setTotalValue(1000);
+    setHistory([{ year: 0, total: 1000, event: 'Started with $1,000' }]);
+    setXpAwarded(false);
   };
 
   const totalAllocated = Object.values(portfolioPercentages).reduce((a, b) => a + b, 0);
@@ -1176,6 +1232,7 @@ function InvestingGame({ userData, setUserData }) {
           <div className="mb-6">
             <h3 className="text-xl font-semibold mb-2">Allocate Your Portfolio</h3>
             <p className="text-gray-600">Starting with $1,000 - Choose your investment mix</p>
+            <p className="text-sm text-gray-500 mt-2">📊 Earn XP based on your investment returns after 10+ years!</p>
           </div>
 
           <div className="space-y-4 mb-6">
@@ -1254,6 +1311,20 @@ function InvestingGame({ userData, setUserData }) {
             </div>
           )}
 
+          {year >= 10 && xpAwarded && (
+            <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg">
+              <p className="text-sm font-semibold text-green-800">🎉 XP Earned!</p>
+              <p className="text-sm text-green-700">
+                Based on your {((totalValue / 1000 - 1) * 100).toFixed(1)}% return, you earned {calculateAndAwardXP() || 
+                  (((totalValue / 1000 - 1) * 100) < 0 ? 50 :
+                   ((totalValue / 1000 - 1) * 100) <= 20 ? 100 :
+                   ((totalValue / 1000 - 1) * 100) <= 50 ? 200 :
+                   ((totalValue / 1000 - 1) * 100) <= 100 ? 300 :
+                   ((totalValue / 1000 - 1) * 100) <= 200 ? 500 : 750)} XP!
+              </p>
+            </div>
+          )}
+
           <div className="space-y-2 mb-6">
             {investments.map(inv => (
               <div key={inv.id} className="flex justify-between p-3 bg-gray-50 rounded">
@@ -1294,7 +1365,7 @@ function InvestingGame({ userData, setUserData }) {
             onClick={resetAllocation}
             className="w-full bg-gray-600 text-white py-2 rounded-lg font-semibold hover:bg-gray-700"
           >
-            Adjust Portfolio Allocation
+            Reset & Try Different Strategy
           </button>
 
           {year >= 50 && (
