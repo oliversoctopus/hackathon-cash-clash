@@ -46,7 +46,7 @@ export default function App() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-teal-200">
         <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-teal-700">FinLit Champions</h1>
+          <h1 className="text-2xl font-bold text-teal-700">Cash Clash</h1>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5 text-orange-500" />
@@ -133,23 +133,23 @@ function HomePage({ userData, setCurrentPage }) {
         </p>
         
         {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6">
-          <div className="bg-gradient-to-r from-teal-50 to-teal-100 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Today's Goal</p>
-            <p className="text-2xl font-bold text-teal-700">Complete 3 games</p>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
+            <p className="text-sm text-gray-600">Total XP</p>
+            <p className="text-2xl font-bold text-blue-700">{userData.totalXP}</p>
           </div>
-          <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Squad Rank</p>
-            <p className="text-2xl font-bold text-purple-700">#12</p>
+          <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
+            <p className="text-sm text-gray-600">Current Level</p>
+            <p className="text-2xl font-bold text-green-700">{userData.level}</p>
           </div>
           <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Global Rank</p>
-            <p className="text-2xl font-bold text-orange-700">#156</p>
+            <p className="text-sm text-gray-600">Streak Days</p>
+            <p className="text-2xl font-bold text-orange-700">{userData.streakDays}</p>
           </div>
         </div>
       </div>
 
-      {/* Games Grid */}
+      {/* Games Section */}
       <div className="grid md:grid-cols-3 gap-6">
         {games.map(game => {
           const Icon = game.icon;
@@ -159,12 +159,12 @@ function HomePage({ userData, setCurrentPage }) {
               onClick={() => setCurrentPage(game.id)}
               className="bg-white rounded-xl shadow-lg p-6 cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
             >
-              <div className={`${game.color} w-16 h-16 rounded-lg flex items-center justify-center mb-4`}>
+              <div className={`${game.color} w-16 h-16 rounded-full flex items-center justify-center mb-4`}>
                 <Icon className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">{game.title}</h3>
+              <h3 className="text-xl font-bold mb-2">{game.title}</h3>
               <p className="text-gray-600 mb-4">{game.description}</p>
-              <button className="flex items-center gap-2 text-teal-600 font-semibold hover:text-teal-700">
+              <button className="flex items-center gap-2 text-teal-600 font-semibold">
                 Play Now <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -177,161 +177,133 @@ function HomePage({ userData, setCurrentPage }) {
 
 // Budget Builder Game Component
 function BudgetBuilderGame({ userData, setUserData }) {
-  const [gameState, setGameState] = useState('ready');
-  const [budget, setBudget] = useState(3000);
+  const [budget, setBudget] = useState(2000);
   const [allocations, setAllocations] = useState({
-    rent: 0,
+    housing: 0,
     food: 0,
     transportation: 0,
     entertainment: 0,
     savings: 0,
   });
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [feedback, setFeedback] = useState('');
   const [score, setScore] = useState(0);
 
   const categories = [
-    { id: 'rent', label: 'Rent/Housing', recommended: 900, icon: '🏠' },
-    { id: 'food', label: 'Food & Groceries', recommended: 600, icon: '🍕' },
-    { id: 'transportation', label: 'Transportation', recommended: 450, icon: '🚗' },
-    { id: 'entertainment', label: 'Entertainment', recommended: 300, icon: '🎮' },
-    { id: 'savings', label: 'Savings', recommended: 750, icon: '💰' },
+    { id: 'housing', name: 'Housing', recommended: 30, icon: '🏠' },
+    { id: 'food', name: 'Food', recommended: 15, icon: '🍔' },
+    { id: 'transportation', name: 'Transportation', recommended: 15, icon: '🚗' },
+    { id: 'entertainment', name: 'Entertainment', recommended: 10, icon: '🎮' },
+    { id: 'savings', name: 'Savings', recommended: 20, icon: '💰' },
   ];
 
-  const startGame = () => {
-    setGameState('playing');
-    setTimeLeft(60);
-    setAllocations({ rent: 0, food: 0, transportation: 0, entertainment: 0, savings: 0 });
-  };
-
-  const handleAllocation = (category, amount) => {
-    const newAllocations = { ...allocations };
-    newAllocations[category] = Math.max(0, Math.min(budget, amount));
-    setAllocations(newAllocations);
-  };
-
-  const calculateScore = () => {
-    let points = 0;
-    categories.forEach(cat => {
-      const diff = Math.abs(allocations[cat.id] - cat.recommended);
-      points += Math.max(0, 100 - diff / 10);
-    });
+  const handleAllocation = (category, percentage) => {
+    const newAllocations = { ...allocations, [category]: percentage };
+    const total = Object.values(newAllocations).reduce((a, b) => a + b, 0);
     
-    // Bonus for savings
-    if (allocations.savings >= 750) points += 200;
-    
-    return Math.round(points);
+    if (total <= 100) {
+      setAllocations(newAllocations);
+    }
   };
 
   const submitBudget = () => {
-    const finalScore = calculateScore();
-    setScore(finalScore);
-    setGameState('complete');
-    
-    // Update user data
+    const total = Object.values(allocations).reduce((a, b) => a + b, 0);
+    if (total !== 100) {
+      setFeedback('Your budget must equal exactly 100%!');
+      return;
+    }
+
+    let newScore = 0;
+    let feedbackText = '';
+
+    categories.forEach(cat => {
+      const diff = Math.abs(allocations[cat.id] - cat.recommended);
+      if (diff <= 5) {
+        newScore += 20;
+        feedbackText += `✅ ${cat.name}: Great allocation! `;
+      } else if (diff <= 10) {
+        newScore += 10;
+        feedbackText += `⚠️ ${cat.name}: Close, but could be better. `;
+      } else {
+        feedbackText += `❌ ${cat.name}: Consider adjusting this. `;
+      }
+    });
+
+    setScore(newScore);
+    setFeedback(feedbackText);
     setUserData(prev => ({
       ...prev,
-      totalXP: prev.totalXP + finalScore,
-      level: Math.floor((prev.totalXP + finalScore) / 1000) + 1,
+      totalXP: prev.totalXP + newScore,
+      level: Math.floor((prev.totalXP + newScore) / 100) + 1,
     }));
   };
 
   const totalAllocated = Object.values(allocations).reduce((a, b) => a + b, 0);
-  const remaining = budget - totalAllocated;
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8">
       <h2 className="text-3xl font-bold text-gray-800 mb-6">Budget Builder Challenge</h2>
       
-      {gameState === 'ready' && (
-        <div className="text-center py-12">
-          <h3 className="text-2xl mb-4">Ready to Budget?</h3>
-          <p className="text-gray-600 mb-8">
-            You have $3,000 monthly income. Allocate it wisely across different categories!
-          </p>
-          <button
-            onClick={startGame}
-            className="bg-teal-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-teal-700"
-          >
-            Start Challenge
-          </button>
-        </div>
-      )}
+      <div className="mb-6">
+        <p className="text-lg mb-2">Monthly Income: <span className="font-bold">${budget}</span></p>
+        <p className="text-sm text-gray-600">Allocate your budget across different categories</p>
+      </div>
 
-      {gameState === 'playing' && (
-        <div>
-          <div className="flex justify-between mb-6">
-            <div className="text-lg">
-              <span className="font-semibold">Budget:</span> ${budget}
-            </div>
-            <div className={`text-lg font-semibold ${remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
-              Remaining: ${remaining}
-            </div>
-          </div>
-
-          <div className="space-y-4 mb-8">
-            {categories.map(cat => (
-              <div key={cat.id} className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium flex items-center gap-2">
-                    <span className="text-2xl">{cat.icon}</span>
-                    {cat.label}
-                  </span>
-                  <span className="text-sm text-gray-500">Recommended: ${cat.recommended}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="0"
-                    max={budget}
-                    value={allocations[cat.id]}
-                    onChange={(e) => handleAllocation(cat.id, parseInt(e.target.value))}
-                    className="flex-1"
-                  />
-                  <input
-                    type="number"
-                    value={allocations[cat.id]}
-                    onChange={(e) => handleAllocation(cat.id, parseInt(e.target.value) || 0)}
-                    className="w-24 px-2 py-1 border rounded"
-                  />
-                </div>
+      <div className="space-y-4 mb-6">
+        {categories.map(cat => (
+          <div key={cat.id} className="bg-gray-50 p-4 rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{cat.icon}</span>
+                <span className="font-medium">{cat.name}</span>
+                <span className="text-sm text-gray-500">(Recommended: {cat.recommended}%)</span>
               </div>
-            ))}
+              <div className="flex items-center gap-2">
+                <span className="font-bold">{allocations[cat.id]}%</span>
+                <span className="text-gray-500">${Math.round(budget * allocations[cat.id] / 100)}</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={allocations[cat.id]}
+              onChange={(e) => handleAllocation(cat.id, parseInt(e.target.value))}
+              className="w-full"
+            />
           </div>
+        ))}
+      </div>
 
-          <button
-            onClick={submitBudget}
-            disabled={remaining !== 0}
-            className={`w-full py-3 rounded-lg font-semibold ${
-              remaining === 0 
-                ? 'bg-teal-600 text-white hover:bg-teal-700' 
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            {remaining === 0 ? 'Submit Budget' : `Balance your budget (${remaining > 0 ? '+' : ''}$${remaining})`}
-          </button>
+      <div className="mb-6">
+        <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
+          <span className="font-semibold">Total Allocated:</span>
+          <span className={`font-bold text-xl ${totalAllocated === 100 ? 'text-green-600' : totalAllocated > 100 ? 'text-red-600' : 'text-orange-600'}`}>
+            {totalAllocated}%
+          </span>
         </div>
-      )}
+      </div>
 
-      {gameState === 'complete' && (
-        <div className="text-center py-12">
-          <h3 className="text-3xl font-bold mb-4">Great Job! 🎉</h3>
-          <p className="text-5xl font-bold text-teal-600 mb-4">{score} XP</p>
-          <p className="text-gray-600 mb-8">
-            You've earned {score} experience points for your budgeting skills!
-          </p>
-          <button
-            onClick={startGame}
-            className="bg-teal-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-teal-700"
-          >
-            Play Again
-          </button>
+      <button
+        onClick={submitBudget}
+        className="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700"
+      >
+        Submit Budget
+      </button>
+
+      {feedback && (
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <p className="font-semibold mb-2">Feedback:</p>
+          <p className="text-sm">{feedback}</p>
+          {score > 0 && (
+            <p className="mt-2 text-lg font-bold text-green-600">Score: {score} XP</p>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-// Money Match Game Component
+// Money Match Game Component  
 function MoneyMatchGame({ userData, setUserData }) {
   const [currentCard, setCurrentCard] = useState(0);
   const [score, setScore] = useState(0);
@@ -339,41 +311,34 @@ function MoneyMatchGame({ userData, setUserData }) {
 
   const scenarios = [
     {
-      id: 1,
-      scenario: "Buy the latest iPhone on a payment plan",
-      isGood: false,
-      explanation: "Payment plans can lead to overspending and debt. Save up and buy it outright instead!"
+      scenario: "You got a $50 birthday gift. Put it all into savings?",
+      correct: 'right',
+      explanation: "Saving birthday money is a great habit to build wealth over time!"
     },
     {
-      id: 2,
-      scenario: "Start an emergency fund with $20/month",
-      isGood: true,
-      explanation: "Great choice! Even small amounts add up. Emergency funds protect you from unexpected expenses."
+      scenario: "Buy the latest $200 sneakers with your first paycheck?",
+      correct: 'left',
+      explanation: "Spending your entire first paycheck on wants instead of needs isn't wise."
     },
     {
-      id: 3,
-      scenario: "Invest in your friend's 'guaranteed' crypto scheme",
-      isGood: false,
-      explanation: "If it sounds too good to be true, it probably is. Never invest in unregulated schemes."
+      scenario: "Set aside 20% of your allowance each week?",
+      correct: 'right',
+      explanation: "The 20% savings rule is a fantastic habit to start early!"
     },
     {
-      id: 4,
-      scenario: "Open a high-yield savings account",
-      isGood: true,
-      explanation: "Smart move! High-yield accounts help your money grow faster than regular savings."
+      scenario: "Take out a loan for the newest iPhone?",
+      correct: 'left',
+      explanation: "Going into debt for a depreciating asset like a phone is not smart."
     },
     {
-      id: 5,
-      scenario: "Max out credit card for spring break trip",
-      isGood: false,
-      explanation: "Credit card debt has high interest rates. Save up for trips to avoid financial stress."
+      scenario: "Research prices before making a big purchase?",
+      correct: 'right',
+      explanation: "Comparison shopping can save you significant money!"
     },
   ];
 
   const handleSwipe = (direction) => {
-    const current = scenarios[currentCard];
-    const correct = (direction === 'right' && current.isGood) || (direction === 'left' && !current.isGood);
-    
+    const correct = scenarios[currentCard].correct === direction;
     if (correct) {
       setScore(score + 100);
     }
@@ -385,6 +350,7 @@ function MoneyMatchGame({ userData, setUserData }) {
       setUserData(prev => ({
         ...prev,
         totalXP: prev.totalXP + score + (correct ? 100 : 0),
+        level: Math.floor((prev.totalXP + score + (correct ? 100 : 0)) / 100) + 1,
       }));
     }
   };
@@ -452,55 +418,177 @@ function MoneyMatchGame({ userData, setUserData }) {
   );
 }
 
-// Investing Game Component
+// Enhanced Investing Game Component with Realistic Risk
 function InvestingGame({ userData, setUserData }) {
   const [year, setYear] = useState(0);
-  const [principal, setPrincipal] = useState(1000);
-  const [portfolio, setPortfolio] = useState({
+  const [totalValue, setTotalValue] = useState(1000);
+  const [portfolioPercentages, setPortfolioPercentages] = useState({
     bank: 0,
     index: 0,
     risky: 0,
   });
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState([{ year: 0, total: 1000, event: 'Started with $1,000' }]);
   const [gameState, setGameState] = useState('setup');
+  const [lastYearReturns, setLastYearReturns] = useState({});
+  const [yearlyEvents, setYearlyEvents] = useState([]);
 
   const investments = [
-    { id: 'bank', name: 'Savings Account', rate: 0.02, risk: 'No risk', color: 'bg-green-500' },
-    { id: 'index', name: 'Index Fund', rate: 0.08, risk: 'Moderate risk', color: 'bg-blue-500' },
-    { id: 'risky', name: 'Growth Stocks', rate: 0.15, risk: 'High risk', color: 'bg-red-500' },
+    { 
+      id: 'bank', 
+      name: 'Savings Account', 
+      avgReturn: '2%',
+      description: 'Steady 2% annual return, no risk',
+      risk: 'No risk', 
+      color: 'bg-green-500' 
+    },
+    { 
+      id: 'index', 
+      name: 'Index Fund', 
+      avgReturn: '8%',
+      description: 'Average 8% return with moderate volatility (-20% to +30%)',
+      risk: 'Moderate risk', 
+      color: 'bg-blue-500' 
+    },
+    { 
+      id: 'risky', 
+      name: 'Growth Stocks', 
+      avgReturn: 'High variance',
+      description: '40% chance: +30%, 40% chance: -10%, 20% chance: -75%',
+      risk: 'High risk', 
+      color: 'bg-red-500' 
+    },
   ];
 
-  const allocateFunds = (type, amount) => {
-    const total = Object.values(portfolio).reduce((a, b) => a + b, 0) - portfolio[type] + amount;
-    if (total <= principal) {
-      setPortfolio(prev => ({ ...prev, [type]: amount }));
+  const allocatePercentage = (type, percentage) => {
+    const newPercentages = { ...portfolioPercentages, [type]: percentage };
+    const total = Object.values(newPercentages).reduce((a, b) => a + b, 0);
+    
+    if (total <= 100) {
+      setPortfolioPercentages(newPercentages);
     }
   };
 
   const simulateYear = () => {
-    const newPortfolio = { ...portfolio };
+    let newValue = 0;
+    const returns = {};
+    const events = [];
     
-    // Apply returns with some randomness
-    newPortfolio.bank *= 1.02;
-    newPortfolio.index *= (1 + (0.08 + (Math.random() - 0.5) * 0.1));
-    newPortfolio.risky *= (1 + (0.15 + (Math.random() - 0.5) * 0.3));
-
-    setPortfolio(newPortfolio);
+    // Savings Account - Fixed 2% return
+    const bankAmount = totalValue * (portfolioPercentages.bank / 100);
+    const bankReturn = bankAmount * 1.02;
+    newValue += bankReturn;
+    returns.bank = 2;
+    
+    // Index Fund - Moderate volatility
+    const indexAmount = totalValue * (portfolioPercentages.index / 100);
+    const indexRandom = Math.random();
+    let indexReturnRate;
+    if (indexRandom < 0.15) {
+      indexReturnRate = -0.20; // 15% chance of -20%
+      events.push('📉 Market correction: Index funds down 20%');
+    } else if (indexRandom < 0.85) {
+      indexReturnRate = 0.08 + (Math.random() - 0.5) * 0.10; // 70% chance of 3-13%
+    } else {
+      indexReturnRate = 0.30; // 15% chance of +30%
+      events.push('📈 Bull market: Index funds up 30%!');
+    }
+    const indexReturn = indexAmount * (1 + indexReturnRate);
+    newValue += indexReturn;
+    returns.index = Math.round(indexReturnRate * 100);
+    
+    // Growth Stocks - High volatility
+    const riskyAmount = totalValue * (portfolioPercentages.risky / 100);
+    const riskyRandom = Math.random();
+    let riskyReturnRate;
+    if (riskyRandom < 0.4) {
+      riskyReturnRate = 0.30; // 40% chance of +30%
+      events.push('🚀 Tech boom: Growth stocks surge 30%!');
+    } else if (riskyRandom < 0.8) {
+      riskyReturnRate = -0.10; // 40% chance of -10%
+      events.push('⚠️ Growth stocks dip 10%');
+    } else {
+      riskyReturnRate = -0.75; // 20% chance of -75%
+      events.push('💥 Market crash: Growth stocks plummet 75%!');
+    }
+    const riskyReturn = riskyAmount * (1 + riskyReturnRate);
+    newValue += riskyReturn;
+    returns.risky = Math.round(riskyReturnRate * 100);
+    
+    setTotalValue(newValue);
+    setLastYearReturns(returns);
+    setYearlyEvents(events);
     setYear(year + 1);
     
-    const total = Object.values(newPortfolio).reduce((a, b) => a + b, 0);
-    setHistory([...history, { year: year + 1, total }]);
+    const eventText = events.length > 0 ? events.join(', ') : 'Steady growth';
+    setHistory([...history, { year: year + 1, total: newValue, event: eventText }]);
+  };
+
+  const simulateFiveYears = () => {
+    let currentValue = totalValue;
+    let currentYear = year;
+    const newHistory = [...history];
+    
+    for (let i = 0; i < 5 && currentYear < 50; i++) {
+      let yearValue = 0;
+      const events = [];
+      
+      // Simulate each investment
+      const bankAmount = currentValue * (portfolioPercentages.bank / 100);
+      yearValue += bankAmount * 1.02;
+      
+      const indexAmount = currentValue * (portfolioPercentages.index / 100);
+      const indexRandom = Math.random();
+      let indexReturnRate;
+      if (indexRandom < 0.15) {
+        indexReturnRate = -0.20;
+        events.push('Market correction');
+      } else if (indexRandom < 0.85) {
+        indexReturnRate = 0.08 + (Math.random() - 0.5) * 0.10;
+      } else {
+        indexReturnRate = 0.30;
+        events.push('Bull market');
+      }
+      yearValue += indexAmount * (1 + indexReturnRate);
+      
+      const riskyAmount = currentValue * (portfolioPercentages.risky / 100);
+      const riskyRandom = Math.random();
+      let riskyReturnRate;
+      if (riskyRandom < 0.4) {
+        riskyReturnRate = 0.30;
+        events.push('Tech boom');
+      } else if (riskyRandom < 0.8) {
+        riskyReturnRate = -0.10;
+      } else {
+        riskyReturnRate = -0.75;
+        events.push('Market crash!');
+      }
+      yearValue += riskyAmount * (1 + riskyReturnRate);
+      
+      currentValue = yearValue;
+      currentYear++;
+      
+      const eventText = events.length > 0 ? events.join(', ') : 'Normal year';
+      newHistory.push({ year: currentYear, total: yearValue, event: eventText });
+    }
+    
+    setTotalValue(currentValue);
+    setYear(currentYear);
+    setHistory(newHistory);
+    setYearlyEvents([`Simulated 5 years - ending value: $${Math.round(currentValue)}`]);
   };
 
   const startSimulation = () => {
-    if (Object.values(portfolio).reduce((a, b) => a + b, 0) === principal) {
+    const total = Object.values(portfolioPercentages).reduce((a, b) => a + b, 0);
+    if (total === 100) {
       setGameState('running');
-      setHistory([{ year: 0, total: principal }]);
     }
   };
 
-  const totalValue = Object.values(portfolio).reduce((a, b) => a + b, 0);
-  const totalAllocated = gameState === 'setup' ? totalValue : 0;
+  const resetAllocation = () => {
+    setGameState('setup');
+  };
+
+  const totalAllocated = Object.values(portfolioPercentages).reduce((a, b) => a + b, 0);
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-8">
@@ -509,8 +597,8 @@ function InvestingGame({ userData, setUserData }) {
       {gameState === 'setup' && (
         <div>
           <div className="mb-6">
-            <h3 className="text-xl font-semibold mb-2">Allocate Your $1,000</h3>
-            <p className="text-gray-600">Choose how to invest your money across different risk levels</p>
+            <h3 className="text-xl font-semibold mb-2">Allocate Your Portfolio</h3>
+            <p className="text-gray-600">Starting with $1,000 - Choose your investment mix</p>
           </div>
 
           <div className="space-y-4 mb-6">
@@ -519,38 +607,41 @@ function InvestingGame({ userData, setUserData }) {
                 <div className="flex justify-between items-center mb-2">
                   <div>
                     <span className="font-medium">{inv.name}</span>
-                    <span className="ml-2 text-sm text-gray-500">({inv.rate * 100}% avg return)</span>
+                    <span className="ml-2 text-sm text-gray-500">({inv.avgReturn})</span>
                   </div>
                   <span className={`px-2 py-1 rounded text-xs text-white ${inv.color}`}>
                     {inv.risk}
                   </span>
                 </div>
+                <p className="text-xs text-gray-600 mb-2">{inv.description}</p>
                 <div className="flex items-center gap-4">
                   <input
                     type="range"
                     min="0"
-                    max={principal}
-                    value={portfolio[inv.id]}
-                    onChange={(e) => allocateFunds(inv.id, parseInt(e.target.value))}
+                    max="100"
+                    value={portfolioPercentages[inv.id]}
+                    onChange={(e) => allocatePercentage(inv.id, parseInt(e.target.value))}
                     className="flex-1"
                   />
-                  <span className="w-20 text-right">${portfolio[inv.id]}</span>
+                  <span className="w-16 text-right font-semibold">{portfolioPercentages[inv.id]}%</span>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="mb-6 text-center">
+          <div className="mb-6 text-center p-4 bg-blue-50 rounded-lg">
             <p className="text-lg">
-              Allocated: ${totalAllocated} / $1,000
+              Total Allocated: <span className={`font-bold ${totalAllocated === 100 ? 'text-green-600' : 'text-orange-600'}`}>
+                {totalAllocated}%
+              </span>
             </p>
           </div>
 
           <button
             onClick={startSimulation}
-            disabled={totalAllocated !== principal}
+            disabled={totalAllocated !== 100}
             className={`w-full py-3 rounded-lg font-semibold ${
-              totalAllocated === principal
+              totalAllocated === 100
                 ? 'bg-purple-600 text-white hover:bg-purple-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
@@ -569,51 +660,88 @@ function InvestingGame({ userData, setUserData }) {
                 <p className="text-3xl font-bold">${Math.round(totalValue)}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-gray-600">Growth</p>
-                <p className={`text-2xl font-bold ${totalValue > principal ? 'text-green-600' : 'text-red-600'}`}>
-                  {((totalValue / principal - 1) * 100).toFixed(1)}%
+                <p className="text-sm text-gray-600">Total Return</p>
+                <p className={`text-2xl font-bold ${totalValue >= 1000 ? 'text-green-600' : 'text-red-600'}`}>
+                  {((totalValue / 1000 - 1) * 100).toFixed(1)}%
                 </p>
               </div>
             </div>
           </div>
 
+          {yearlyEvents.length > 0 && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm font-semibold text-yellow-800">Market Events:</p>
+              {yearlyEvents.map((event, idx) => (
+                <p key={idx} className="text-sm text-yellow-700">{event}</p>
+              ))}
+            </div>
+          )}
+
           <div className="space-y-2 mb-6">
             {investments.map(inv => (
-              <div key={inv.id} className="flex justify-between p-2 bg-gray-50 rounded">
-                <span>{inv.name}</span>
-                <span className="font-semibold">${Math.round(portfolio[inv.id])}</span>
+              <div key={inv.id} className="flex justify-between p-3 bg-gray-50 rounded">
+                <div className="flex items-center gap-2">
+                  <span>{inv.name}</span>
+                  <span className="text-sm text-gray-500">({portfolioPercentages[inv.id]}%)</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold">${Math.round(totalValue * portfolioPercentages[inv.id] / 100)}</span>
+                  {lastYearReturns[inv.id] !== undefined && (
+                    <span className={`text-sm font-medium ${lastYearReturns[inv.id] >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {lastYearReturns[inv.id] >= 0 ? '+' : ''}{lastYearReturns[inv.id]}%
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 mb-4">
             <button
               onClick={simulateYear}
               disabled={year >= 50}
-              className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700"
+              className="flex-1 bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              Simulate Next Year
+              Next Year
             </button>
             <button
-              onClick={() => {
-                for(let i = 0; i < 5; i++) {
-                  if (year < 50) simulateYear();
-                }
-              }}
+              onClick={simulateFiveYears}
               disabled={year >= 50}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+              className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               Skip 5 Years
             </button>
           </div>
+
+          <button
+            onClick={resetAllocation}
+            className="w-full bg-gray-600 text-white py-2 rounded-lg font-semibold hover:bg-gray-700"
+          >
+            Adjust Portfolio Allocation
+          </button>
 
           {year >= 50 && (
             <div className="mt-6 p-4 bg-green-50 rounded-lg text-center">
               <p className="text-lg font-semibold text-green-800">
                 Simulation Complete! Your $1,000 grew to ${Math.round(totalValue)}
               </p>
+              <p className="text-sm text-green-700 mt-2">
+                That's a {((totalValue / 1000 - 1) * 100).toFixed(1)}% total return over 50 years!
+              </p>
             </div>
           )}
+
+          <div className="mt-6">
+            <h4 className="font-semibold mb-2">Recent History:</h4>
+            <div className="max-h-32 overflow-y-auto space-y-1 text-sm">
+              {history.slice(-5).reverse().map((h, idx) => (
+                <div key={idx} className="flex justify-between p-2 bg-gray-50 rounded">
+                  <span>Year {h.year}: ${Math.round(h.total)}</span>
+                  <span className="text-gray-600 text-xs">{h.event}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -637,61 +765,54 @@ function SocialPage({ userData }) {
 
   return (
     <div className="space-y-6">
-      {/* Friend Groups */}
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Your Money Squads</h2>
+      {/* Friend Squads */}
+      <div className="bg-white rounded-2xl shadow-lg p-8">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6">Your Squads</h2>
+        
         <div className="grid md:grid-cols-2 gap-4">
-          {friendGroups.map(group => (
-            <div key={group.name} className="bg-gradient-to-r from-teal-50 to-blue-50 p-4 rounded-lg">
-              <h3 className="font-bold text-lg mb-2">{group.name}</h3>
-              <div className="space-y-1 text-sm">
+          {friendGroups.map((group, idx) => (
+            <div key={idx} className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-lg">
+              <h3 className="text-xl font-bold mb-3">{group.name}</h3>
+              <div className="space-y-2 text-sm">
                 <p>Members: {group.members}</p>
                 <p>Your Rank: #{group.yourRank}</p>
-                <p>Top Score: {group.topScore}</p>
+                <p>Top Score: {group.topScore} XP</p>
               </div>
-              <button className="mt-3 text-teal-600 font-semibold text-sm hover:text-teal-700">
-                View Squad →
+              <button className="mt-4 bg-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">
+                View Squad
               </button>
             </div>
           ))}
         </div>
-        <button className="mt-4 w-full bg-teal-600 text-white py-2 rounded-lg font-semibold hover:bg-teal-700">
-          Create New Squad
-        </button>
       </div>
 
       {/* Global Leaderboard */}
-      <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Global Leaderboard</h2>
-        <div className="space-y-2">
-          {globalLeaderboard.map(player => (
-            <div key={player.rank} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100">
+      <div className="bg-white rounded-2xl shadow-lg p-8">
+        <h2 className="text-3xl font-bold text-gray-800 mb-6">Global Leaderboard</h2>
+        
+        <div className="space-y-3">
+          {globalLeaderboard.map((player) => (
+            <div key={player.rank} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                  player.rank === 1 ? 'bg-yellow-500' :
-                  player.rank === 2 ? 'bg-gray-400' :
-                  player.rank === 3 ? 'bg-orange-600' :
-                  'bg-teal-500'
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                  player.rank === 1 ? 'bg-yellow-400' :
+                  player.rank === 2 ? 'bg-gray-300' :
+                  player.rank === 3 ? 'bg-orange-400' :
+                  'bg-gray-200'
                 }`}>
                   {player.rank}
                 </div>
                 <div>
                   <p className="font-semibold">{player.name}</p>
-                  <p className="text-sm text-gray-500">Level {player.level}</p>
+                  <p className="text-sm text-gray-600">Level {player.level}</p>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-bold text-lg">{player.score.toLocaleString()}</p>
-                <p className="text-xs text-gray-500">XP</p>
+                <p className="text-sm text-gray-600">XP</p>
               </div>
             </div>
           ))}
-        </div>
-        <div className="mt-4 p-3 bg-teal-50 rounded-lg">
-          <div className="flex justify-between items-center">
-            <span className="font-semibold">Your Rank</span>
-            <span className="text-xl font-bold text-teal-700">#156</span>
-          </div>
         </div>
       </div>
     </div>
