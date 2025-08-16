@@ -1351,40 +1351,75 @@ function SocialPage({ userData }) {
     ]
   });
 
+  // Generate dynamic leaderboards based on actual user data
+  const generateLeaderboard = (squadName) => {
+    const baseMembers = squadName === 'Squad Alpha' 
+      ? [
+          { name: 'Sarah M.', score: 15420, level: 16, avatar: '👧' },
+          { name: 'Mike T.', score: 14200, level: 15, avatar: '👦' },
+          { name: 'Ashley K.', score: 11500, level: 12, avatar: '👩' },
+          { name: 'James L.', score: 10200, level: 11, avatar: '🧑' },
+          { name: 'Emma R.', score: 9800, level: 10, avatar: '👩‍🦰' },
+          { name: 'David P.', score: 8900, level: 9, avatar: '👨' },
+          { name: 'Sophie L.', score: 7600, level: 8, avatar: '👱‍♀️' },
+        ]
+      : [
+          { name: 'Alex J.', score: 12300, level: 13, avatar: '🧑‍💼' },
+          { name: 'Taylor S.', score: 11100, level: 12, avatar: '👤' },
+          { name: 'Jordan M.', score: 10500, level: 11, avatar: '🧑‍🎓' },
+          { name: 'Casey R.', score: 9800, level: 10, avatar: '👨‍💻' },
+          { name: 'Morgan B.', score: 8400, level: 9, avatar: '👩‍💼' },
+          { name: 'Chris D.', score: 7200, level: 8, avatar: '🧑‍🏫' },
+          { name: 'Pat L.', score: 6500, level: 7, avatar: '👨‍🎤' },
+        ];
+    
+    // Add the actual user data
+    const allMembers = [...baseMembers, { 
+      name: 'You', 
+      score: userData.totalXP, 
+      level: userData.level, 
+      avatar: '⭐' 
+    }];
+    
+    // Sort by score
+    allMembers.sort((a, b) => b.score - a.score);
+    
+    // Add ranks
+    return allMembers.map((member, index) => ({
+      ...member,
+      rank: index + 1
+    }));
+  };
+
+  // Get user's rank in a squad
+  const getUserRank = (squadName) => {
+    const leaderboard = generateLeaderboard(squadName);
+    const userEntry = leaderboard.find(entry => entry.name === 'You');
+    return userEntry ? userEntry.rank : 0;
+  };
+
+  // Get top score in a squad
+  const getTopScore = (squadName) => {
+    const leaderboard = generateLeaderboard(squadName);
+    return leaderboard.length > 0 ? leaderboard[0].score : 0;
+  };
+
   const friendGroups = [
     { 
       name: 'Squad Alpha', 
       members: 12, 
-      yourRank: 3, 
-      topScore: 15420,
+      get yourRank() { return getUserRank(this.name); },
+      get topScore() { return getTopScore(this.name); },
       description: 'Elite financial literacy champions',
-      leaderboard: [
-        { rank: 1, name: 'Sarah M.', score: 15420, level: 16, avatar: '👧' },
-        { rank: 2, name: 'Mike T.', score: 14200, level: 15, avatar: '👦' },
-        { rank: 3, name: 'You', score: 12800, level: 13, avatar: '⭐' },
-        { rank: 4, name: 'Ashley K.', score: 11500, level: 12, avatar: '👩' },
-        { rank: 5, name: 'James L.', score: 10200, level: 11, avatar: '🧑' },
-        { rank: 6, name: 'Emma R.', score: 9800, level: 10, avatar: '👩‍🦰' },
-        { rank: 7, name: 'David P.', score: 8900, level: 9, avatar: '👨' },
-        { rank: 8, name: 'Sophie L.', score: 7600, level: 8, avatar: '👱‍♀️' },
-      ]
+      get leaderboard() { return generateLeaderboard(this.name); }
     },
     { 
       name: 'Teen Investors', 
       members: 8, 
-      yourRank: 5, 
-      topScore: 12300,
+      get yourRank() { return getUserRank(this.name); },
+      get topScore() { return getTopScore(this.name); },
       description: 'Future Warren Buffetts in training',
-      leaderboard: [
-        { rank: 1, name: 'Alex J.', score: 12300, level: 13, avatar: '🧑‍💼' },
-        { rank: 2, name: 'Taylor S.', score: 11100, level: 12, avatar: '👤' },
-        { rank: 3, name: 'Jordan M.', score: 10500, level: 11, avatar: '🧑‍🎓' },
-        { rank: 4, name: 'Casey R.', score: 9800, level: 10, avatar: '👨‍💻' },
-        { rank: 5, name: 'You', score: 9200, level: 10, avatar: '⭐' },
-        { rank: 6, name: 'Morgan B.', score: 8400, level: 9, avatar: '👩‍💼' },
-        { rank: 7, name: 'Chris D.', score: 7200, level: 8, avatar: '🧑‍🏫' },
-        { rank: 8, name: 'Pat L.', score: 6500, level: 7, avatar: '👨‍🎤' },
-      ]
+      get leaderboard() { return generateLeaderboard(this.name); }
     },
   ];
 
@@ -1459,7 +1494,7 @@ function SocialPage({ userData }) {
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Squad Leaderboard</h3>
             <div className="space-y-2">
-              {selectedSquad.leaderboard.map((player) => (
+              {selectedSquad.leaderboard.slice(0, 10).map((player) => (
                 <div 
                   key={player.rank} 
                   className={`flex items-center justify-between p-3 rounded-lg ${
