@@ -303,77 +303,182 @@ function BudgetBuilderGame({ userData, setUserData }) {
   );
 }
 
-// Money Match Game Component  
+// Money Match Game Component with Enhanced Feedback
 function MoneyMatchGame({ userData, setUserData }) {
-  const [currentCard, setCurrentCard] = useState(0);
-  const [score, setScore] = useState(0);
-  const [gameComplete, setGameComplete] = useState(false);
-
-  const scenarios = [
+  const allScenarios = [
     {
+      id: 1,
       scenario: "You got a $50 birthday gift. Put it all into savings?",
       correct: 'right',
-      explanation: "Saving birthday money is a great habit to build wealth over time!"
+      explanation: "Saving birthday money is a smart move! Starting to save early, even small amounts, builds great financial habits. The money you save now can grow through compound interest over time. While it's okay to spend some on fun, saving gift money shows financial maturity."
     },
     {
+      id: 2,
       scenario: "Buy the latest $200 sneakers with your first paycheck?",
       correct: 'left',
-      explanation: "Spending your entire first paycheck on wants instead of needs isn't wise."
+      explanation: "This is a poor financial choice. Your first paycheck should go toward necessities and building an emergency fund. Expensive sneakers are a 'want' not a 'need.' They also depreciate quickly - losing value the moment you wear them. A better approach: save most, budget a small amount for celebration."
     },
     {
+      id: 3,
       scenario: "Set aside 20% of your allowance each week?",
       correct: 'right',
-      explanation: "The 20% savings rule is a fantastic habit to start early!"
+      explanation: "Excellent choice! The 20% savings rule is a cornerstone of good financial health. By automatically saving 20% of any money you receive, you're 'paying yourself first.' This habit, started young, can lead to significant wealth accumulation over your lifetime."
     },
     {
+      id: 4,
       scenario: "Take out a loan for the newest iPhone?",
       correct: 'left',
-      explanation: "Going into debt for a depreciating asset like a phone is not smart."
+      explanation: "Bad idea! Going into debt for a luxury item that depreciates rapidly is poor financial planning. Phones lose 50% of their value in the first year. Interest on the loan makes it even more expensive. Save up instead, or buy a less expensive model you can afford."
     },
     {
+      id: 5,
       scenario: "Research prices before making a big purchase?",
       correct: 'right',
-      explanation: "Comparison shopping can save you significant money!"
+      explanation: "Smart shopping! Price comparison can save 10-30% on average. Taking time to research ensures you get the best value for your money. It also helps you avoid impulse purchases and find better alternatives. This habit alone can save thousands over your lifetime."
     },
+    {
+      id: 6,
+      scenario: "Spend your entire tax refund on a vacation?",
+      correct: 'left',
+      explanation: "Not the best choice. While some recreation is important, spending an entire windfall on vacation misses an opportunity. A better approach: save 50%, use 30% for debt payment or investments, and enjoy 20% for fun. Tax refunds are great for boosting emergency funds."
+    },
+    {
+      id: 7,
+      scenario: "Open a high-yield savings account for your emergency fund?",
+      correct: 'right',
+      explanation: "Excellent decision! High-yield savings accounts offer better interest rates than regular savings (often 10x more). They're perfect for emergency funds because your money stays liquid (accessible) while earning more. This maximizes returns on money you need to keep safe."
+    },
+    {
+      id: 8,
+      scenario: "Buy cryptocurrency with money you need for rent next month?",
+      correct: 'left',
+      explanation: "Terrible idea! Never invest money you need for essentials. Crypto is extremely volatile and you could lose 50% overnight. Rent and necessities always come first. Only invest money you can afford to lose completely, and only after bills and emergency savings are covered."
+    },
+    {
+      id: 9,
+      scenario: "Use a budgeting app to track your spending?",
+      correct: 'right',
+      explanation: "Great choice! Budgeting apps help you understand where your money goes. Studies show people who track spending save 20% more on average. These apps can identify wasteful spending, help set goals, and send alerts before you overspend. Knowledge is power in personal finance."
+    },
+    {
+      id: 10,
+      scenario: "Max out credit cards for Black Friday shopping?",
+      correct: 'left',
+      explanation: "Dangerous move! Credit card debt often has 20%+ interest rates. Those 'deals' aren't worth it if you're paying interest for months. Black Friday 'savings' are often inflated anyway. Never spend money you don't have for non-essentials. If you can't pay cash, you can't afford it."
+    }
   ];
 
-  const handleSwipe = (direction) => {
-    const correct = scenarios[currentCard].correct === direction;
-    if (correct) {
-      setScore(score + 100);
-    }
+  // Shuffle scenarios on component mount
+  const [scenarios, setScenarios] = useState([]);
+  const [currentCard, setCurrentCard] = useState(0);
+  const [showResult, setShowResult] = useState(false);
+  const [userChoice, setUserChoice] = useState(null);
+  const [results, setResults] = useState([]);
+  const [gameComplete, setGameComplete] = useState(false);
 
+  // Initialize shuffled scenarios
+  useState(() => {
+    const shuffled = [...allScenarios].sort(() => Math.random() - 0.5).slice(0, 6);
+    setScenarios(shuffled);
+  }, []);
+
+  const handleSwipe = (direction) => {
+    setUserChoice(direction);
+    setShowResult(true);
+    
+    const correct = scenarios[currentCard].correct === direction;
+    setResults([...results, {
+      scenario: scenarios[currentCard].scenario,
+      correct: correct,
+      userChoice: direction,
+      correctAnswer: scenarios[currentCard].correct
+    }]);
+  };
+
+  const nextCard = () => {
     if (currentCard < scenarios.length - 1) {
       setCurrentCard(currentCard + 1);
+      setShowResult(false);
+      setUserChoice(null);
     } else {
       setGameComplete(true);
+      const finalScore = results.filter(r => r.correct).length * 100 + 
+                        (scenarios[currentCard].correct === userChoice ? 100 : 0);
       setUserData(prev => ({
         ...prev,
-        totalXP: prev.totalXP + score + (correct ? 100 : 0),
-        level: Math.floor((prev.totalXP + score + (correct ? 100 : 0)) / 100) + 1,
+        totalXP: prev.totalXP + finalScore,
+        level: Math.floor((prev.totalXP + finalScore) / 100) + 1,
       }));
     }
   };
 
   const resetGame = () => {
+    const shuffled = [...allScenarios].sort(() => Math.random() - 0.5).slice(0, 6);
+    setScenarios(shuffled);
     setCurrentCard(0);
-    setScore(0);
+    setResults([]);
     setGameComplete(false);
+    setShowResult(false);
+    setUserChoice(null);
   };
+
+  if (scenarios.length === 0) {
+    return <div>Loading...</div>;
+  }
+
+  const correctCount = results.filter(r => r.correct).length;
+  const totalScore = correctCount * 100;
 
   if (gameComplete) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-        <h2 className="text-3xl font-bold mb-4">Game Complete! 🎉</h2>
-        <p className="text-5xl font-bold text-purple-600 mb-4">{score} XP</p>
-        <p className="text-gray-600 mb-8">
-          You've mastered financial decision-making!
-        </p>
+      <div className="bg-white rounded-2xl shadow-lg p-8">
+        <h2 className="text-3xl font-bold mb-6 text-center">Game Complete! 🎉</h2>
+        
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl mb-6">
+          <div className="text-center mb-4">
+            <p className="text-5xl font-bold text-purple-600">{totalScore} XP</p>
+            <p className="text-lg text-gray-600 mt-2">
+              You got {correctCount} out of {scenarios.length} correct!
+            </p>
+          </div>
+          
+          <div className="flex justify-center gap-8 text-center">
+            <div>
+              <p className="text-3xl font-bold text-green-600">✓ {correctCount}</p>
+              <p className="text-sm text-gray-600">Correct</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-red-600">✗ {scenarios.length - correctCount}</p>
+              <p className="text-sm text-gray-600">Incorrect</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3 mb-6">
+          <h3 className="font-semibold text-lg mb-2">Your Results:</h3>
+          {results.map((result, idx) => (
+            <div key={idx} className={`p-3 rounded-lg flex items-start gap-3 ${
+              result.correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+            }`}>
+              <span className={`text-2xl ${result.correct ? '✅' : '❌'}`}>
+                {result.correct ? '✅' : '❌'}
+              </span>
+              <div className="flex-1">
+                <p className="text-sm font-medium">{result.scenario}</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Your answer: {result.userChoice === 'right' ? 'Good Choice' : 'Bad Choice'} | 
+                  Correct: {result.correctAnswer === 'right' ? 'Good Choice' : 'Bad Choice'}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <button
           onClick={resetGame}
-          className="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700"
+          className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700"
         >
-          Play Again
+          Play Again with New Questions
         </button>
       </div>
     );
@@ -384,8 +489,10 @@ function MoneyMatchGame({ userData, setUserData }) {
       <h2 className="text-3xl font-bold text-gray-800 mb-6">Money Match</h2>
       
       <div className="mb-4 flex justify-between">
-        <span className="text-lg font-semibold">Score: {score}</span>
-        <span className="text-lg">{currentCard + 1} / {scenarios.length}</span>
+        <span className="text-lg font-semibold">
+          Score: {results.filter(r => r.correct).length * 100} XP
+        </span>
+        <span className="text-lg">Card {currentCard + 1} of {scenarios.length}</span>
       </div>
 
       <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl p-8 mb-8 min-h-[200px] flex items-center justify-center">
@@ -394,26 +501,52 @@ function MoneyMatchGame({ userData, setUserData }) {
         </p>
       </div>
 
-      <div className="flex justify-center gap-8">
-        <button
-          onClick={() => handleSwipe('left')}
-          className="bg-red-500 text-white px-8 py-4 rounded-xl font-semibold hover:bg-red-600 flex items-center gap-2"
-        >
-          ❌ Bad Choice
-        </button>
-        <button
-          onClick={() => handleSwipe('right')}
-          className="bg-green-500 text-white px-8 py-4 rounded-xl font-semibold hover:bg-green-600 flex items-center gap-2"
-        >
-          ✅ Good Choice
-        </button>
-      </div>
+      {!showResult ? (
+        <div className="flex justify-center gap-8">
+          <button
+            onClick={() => handleSwipe('left')}
+            className="bg-red-500 text-white px-8 py-4 rounded-xl font-semibold hover:bg-red-600 flex items-center gap-2 transform transition hover:scale-105"
+          >
+            ❌ Bad Choice
+          </button>
+          <button
+            onClick={() => handleSwipe('right')}
+            className="bg-green-500 text-white px-8 py-4 rounded-xl font-semibold hover:bg-green-600 flex items-center gap-2 transform transition hover:scale-105"
+          >
+            ✅ Good Choice
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className={`p-6 rounded-xl text-center ${
+            userChoice === scenarios[currentCard].correct 
+              ? 'bg-green-50 border-2 border-green-300' 
+              : 'bg-red-50 border-2 border-red-300'
+          }`}>
+            <p className="text-2xl font-bold mb-2">
+              {userChoice === scenarios[currentCard].correct ? '✅ Correct!' : '❌ Incorrect'}
+            </p>
+            <p className="text-lg">
+              The right answer was: 
+              <span className="font-bold ml-2">
+                {scenarios[currentCard].correct === 'right' ? 'Good Choice ✅' : 'Bad Choice ❌'}
+              </span>
+            </p>
+          </div>
 
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <p className="text-sm text-gray-600">
-          <strong>Tip:</strong> {scenarios[currentCard].explanation}
-        </p>
-      </div>
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <p className="font-semibold text-blue-900 mb-2">💡 Why?</p>
+            <p className="text-sm text-gray-700">{scenarios[currentCard].explanation}</p>
+          </div>
+
+          <button
+            onClick={nextCard}
+            className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transform transition hover:scale-105"
+          >
+            {currentCard < scenarios.length - 1 ? 'Next Card →' : 'See Results'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
