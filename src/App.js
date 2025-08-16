@@ -1079,6 +1079,9 @@ function InvestingGame({ userData, setUserData }) {
     }
     return 0;
   };
+  
+  // Store XP earned for display
+  const [earnedXP, setEarnedXP] = useState(0);
 
   const simulateYear = () => {
     let newValue = 0;
@@ -1315,12 +1318,7 @@ function InvestingGame({ userData, setUserData }) {
             <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg">
               <p className="text-sm font-semibold text-green-800">🎉 XP Earned!</p>
               <p className="text-sm text-green-700">
-                Based on your {((totalValue / 1000 - 1) * 100).toFixed(1)}% return, you earned {calculateAndAwardXP() || 
-                  (((totalValue / 1000 - 1) * 100) < 0 ? 50 :
-                   ((totalValue / 1000 - 1) * 100) <= 20 ? 100 :
-                   ((totalValue / 1000 - 1) * 100) <= 50 ? 200 :
-                   ((totalValue / 1000 - 1) * 100) <= 100 ? 300 :
-                   ((totalValue / 1000 - 1) * 100) <= 200 ? 500 : 750)} XP!
+                Based on your {((totalValue / 1000 - 1) * 100).toFixed(1)}% return, you earned {earnedXP} XP!
               </p>
             </div>
           )}
