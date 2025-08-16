@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Trophy, Users, TrendingUp, DollarSign, Target, Zap, Home, Gamepad2, User, Clock, AlertTriangle, CheckCircle, XCircle, Shield, ShoppingCart, Heart, Car } from 'lucide-react';
+import { ChevronRight, Trophy, Users, TrendingUp, DollarSign, Target, Zap, Home, Gamepad2, User, Clock, AlertTriangle, CheckCircle, XCircle, Shield, ShoppingCart, Heart, Car, Send, ArrowLeft, Crown, Medal, Award } from 'lucide-react';
 
 // Main App Component with Navigation
 export default function App() {
@@ -1325,21 +1325,222 @@ function InvestingGame({ userData, setUserData }) {
   );
 }
 
-// Social Page Component
+// Enhanced Social Page Component with Squad Details
 function SocialPage({ userData }) {
+  const [currentView, setCurrentView] = useState('overview'); // overview, squadDetail
+  const [selectedSquad, setSelectedSquad] = useState(null);
+  const [newMessage, setNewMessage] = useState('');
+  const [messages, setMessages] = useState({
+    'Squad Alpha': [
+      { id: 1, user: 'Sarah M.', message: 'I LOVE this app!', time: '2 mins ago', avatar: '👧' },
+      { id: 2, user: 'Mike T.', message: 'Just hit Level 10! 🎉', time: '5 mins ago', avatar: '👦' },
+      { id: 3, user: 'Ashley K.', message: 'I finally mastered Money Match!', time: '12 mins ago', avatar: '👩' },
+      { id: 4, user: 'James L.', message: 'Yes! I got 30 XP, ten more than you did!', time: '15 mins ago', avatar: '🧑' },
+      { id: 5, user: 'Emma R.', message: 'The budget builder is so helpful for real life!', time: '18 mins ago', avatar: '👩‍🦰' },
+      { id: 6, user: 'David P.', message: "Anyone beat my 450 point month in Budget Builder?", time: '22 mins ago', avatar: '👨' },
+      { id: 7, user: 'Sophie L.', message: 'This squad is amazing! So motivating!', time: '25 mins ago', avatar: '👱‍♀️' },
+      { id: 8, user: 'Ryan K.', message: 'Investment sim taught me so much about risk!', time: '30 mins ago', avatar: '👨‍🦱' },
+    ],
+    'Teen Investors': [
+      { id: 1, user: 'Alex J.', message: 'Who else is crushing the investment simulator?', time: '1 min ago', avatar: '🧑‍💼' },
+      { id: 2, user: 'Taylor S.', message: 'I love how this makes finance FUN!', time: '3 mins ago', avatar: '👤' },
+      { id: 3, user: 'Jordan M.', message: 'Just got 500 XP in one day!', time: '8 mins ago', avatar: '🧑‍🎓' },
+      { id: 4, user: 'Casey R.', message: "This app is literally changing my life!", time: '10 mins ago', avatar: '👨‍💻' },
+      { id: 5, user: 'Morgan B.', message: 'Beat my high score! 2400 XP total!', time: '14 mins ago', avatar: '👩‍💼' },
+      { id: 6, user: 'Chris D.', message: 'The real-world scenarios are SO good', time: '20 mins ago', avatar: '🧑‍🏫' },
+    ]
+  });
+
   const friendGroups = [
-    { name: 'Squad Alpha', members: 12, yourRank: 3, topScore: 15420 },
-    { name: 'Teen Investors', members: 8, yourRank: 5, topScore: 12300 },
+    { 
+      name: 'Squad Alpha', 
+      members: 12, 
+      yourRank: 3, 
+      topScore: 15420,
+      description: 'Elite financial literacy champions',
+      leaderboard: [
+        { rank: 1, name: 'Sarah M.', score: 15420, level: 16, avatar: '👧' },
+        { rank: 2, name: 'Mike T.', score: 14200, level: 15, avatar: '👦' },
+        { rank: 3, name: 'You', score: 12800, level: 13, avatar: '⭐' },
+        { rank: 4, name: 'Ashley K.', score: 11500, level: 12, avatar: '👩' },
+        { rank: 5, name: 'James L.', score: 10200, level: 11, avatar: '🧑' },
+        { rank: 6, name: 'Emma R.', score: 9800, level: 10, avatar: '👩‍🦰' },
+        { rank: 7, name: 'David P.', score: 8900, level: 9, avatar: '👨' },
+        { rank: 8, name: 'Sophie L.', score: 7600, level: 8, avatar: '👱‍♀️' },
+      ]
+    },
+    { 
+      name: 'Teen Investors', 
+      members: 8, 
+      yourRank: 5, 
+      topScore: 12300,
+      description: 'Future Warren Buffetts in training',
+      leaderboard: [
+        { rank: 1, name: 'Alex J.', score: 12300, level: 13, avatar: '🧑‍💼' },
+        { rank: 2, name: 'Taylor S.', score: 11100, level: 12, avatar: '👤' },
+        { rank: 3, name: 'Jordan M.', score: 10500, level: 11, avatar: '🧑‍🎓' },
+        { rank: 4, name: 'Casey R.', score: 9800, level: 10, avatar: '👨‍💻' },
+        { rank: 5, name: 'You', score: 9200, level: 10, avatar: '⭐' },
+        { rank: 6, name: 'Morgan B.', score: 8400, level: 9, avatar: '👩‍💼' },
+        { rank: 7, name: 'Chris D.', score: 7200, level: 8, avatar: '🧑‍🏫' },
+        { rank: 8, name: 'Pat L.', score: 6500, level: 7, avatar: '👨‍🎤' },
+      ]
+    },
   ];
 
   const globalLeaderboard = [
-    { rank: 1, name: 'Sarah M.', score: 28500, level: 15 },
-    { rank: 2, name: 'Mike T.', score: 26100, level: 14 },
-    { rank: 3, name: 'Ashley K.', score: 24800, level: 13 },
-    { rank: 4, name: 'James L.', score: 23200, level: 12 },
-    { rank: 5, name: 'Emma R.', score: 22100, level: 12 },
+    { rank: 1, name: 'Sarah M.', score: 28500, level: 15, avatar: '👧' },
+    { rank: 2, name: 'Mike T.', score: 26100, level: 14, avatar: '👦' },
+    { rank: 3, name: 'Ashley K.', score: 24800, level: 13, avatar: '👩' },
+    { rank: 4, name: 'James L.', score: 23200, level: 12, avatar: '🧑' },
+    { rank: 5, name: 'Emma R.', score: 22100, level: 12, avatar: '👩‍🦰' },
   ];
 
+  const handleViewSquad = (squad) => {
+    setSelectedSquad(squad);
+    setCurrentView('squadDetail');
+  };
+
+  const handleSendMessage = () => {
+    if (newMessage.trim() && selectedSquad) {
+      const newMsg = {
+        id: messages[selectedSquad.name].length + 1,
+        user: 'You',
+        message: newMessage,
+        time: 'Just now',
+        avatar: '⭐'
+      };
+      
+      setMessages(prev => ({
+        ...prev,
+        [selectedSquad.name]: [newMsg, ...prev[selectedSquad.name]]
+      }));
+      setNewMessage('');
+    }
+  };
+
+  if (currentView === 'squadDetail' && selectedSquad) {
+    return (
+      <div className="space-y-6">
+        {/* Squad Header */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <button
+              onClick={() => setCurrentView('overview')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Squads
+            </button>
+            <div className="text-right">
+              <h2 className="text-2xl font-bold text-gray-800">{selectedSquad.name}</h2>
+              <p className="text-sm text-gray-600">{selectedSquad.description}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="bg-blue-50 p-3 rounded-lg text-center">
+              <p className="text-2xl font-bold text-blue-700">{selectedSquad.members}</p>
+              <p className="text-sm text-gray-600">Members</p>
+            </div>
+            <div className="bg-green-50 p-3 rounded-lg text-center">
+              <p className="text-2xl font-bold text-green-700">#{selectedSquad.yourRank}</p>
+              <p className="text-sm text-gray-600">Your Rank</p>
+            </div>
+            <div className="bg-purple-50 p-3 rounded-lg text-center">
+              <p className="text-2xl font-bold text-purple-700">{selectedSquad.topScore}</p>
+              <p className="text-sm text-gray-600">Top Score</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Squad Leaderboard */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Squad Leaderboard</h3>
+            <div className="space-y-2">
+              {selectedSquad.leaderboard.map((player) => (
+                <div 
+                  key={player.rank} 
+                  className={`flex items-center justify-between p-3 rounded-lg ${
+                    player.name === 'You' ? 'bg-gradient-to-r from-teal-50 to-green-50 border-2 border-teal-300' : 'bg-gray-50 hover:bg-gray-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      player.rank === 1 ? 'bg-yellow-400' :
+                      player.rank === 2 ? 'bg-gray-300' :
+                      player.rank === 3 ? 'bg-orange-400' :
+                      'bg-gray-200'
+                    }`}>
+                      {player.rank === 1 && <Crown className="w-4 h-4 text-white" />}
+                      {player.rank === 2 && <Medal className="w-4 h-4 text-white" />}
+                      {player.rank === 3 && <Award className="w-4 h-4 text-white" />}
+                      {player.rank > 3 && player.rank}
+                    </div>
+                    <div className="text-xl">{player.avatar}</div>
+                    <div>
+                      <p className="font-semibold text-sm">{player.name}</p>
+                      <p className="text-xs text-gray-600">Level {player.level}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-lg">{player.score.toLocaleString()}</p>
+                    <p className="text-xs text-gray-600">XP</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Squad Chat */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col h-[500px]">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Squad Chat</h3>
+            
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+              {messages[selectedSquad.name].map((msg) => (
+                <div key={msg.id} className={`flex gap-3 ${msg.user === 'You' ? 'flex-row-reverse' : ''}`}>
+                  <div className="text-2xl flex-shrink-0">{msg.avatar}</div>
+                  <div className={`max-w-[70%] ${msg.user === 'You' ? 'text-right' : ''}`}>
+                    <div className={`inline-block p-3 rounded-lg ${
+                      msg.user === 'You' 
+                        ? 'bg-gradient-to-r from-teal-500 to-green-500 text-white' 
+                        : 'bg-gray-100'
+                    }`}>
+                      <p className="text-sm font-semibold mb-1">{msg.user}</p>
+                      <p className="text-sm">{msg.message}</p>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">{msg.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Message Input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Type a message..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
+              />
+              <button
+                onClick={handleSendMessage}
+                className="bg-gradient-to-r from-teal-500 to-green-500 text-white px-4 py-2 rounded-lg hover:from-teal-600 hover:to-green-600"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Overview screen
   return (
     <div className="space-y-6">
       {/* Friend Squads */}
@@ -1350,12 +1551,16 @@ function SocialPage({ userData }) {
           {friendGroups.map((group, idx) => (
             <div key={idx} className="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-lg">
               <h3 className="text-xl font-bold mb-3">{group.name}</h3>
+              <p className="text-sm text-gray-600 mb-3">{group.description}</p>
               <div className="space-y-2 text-sm">
                 <p>Members: {group.members}</p>
                 <p>Your Rank: #{group.yourRank}</p>
                 <p>Top Score: {group.topScore} XP</p>
               </div>
-              <button className="mt-4 bg-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">
+              <button 
+                onClick={() => handleViewSquad(group)}
+                className="mt-4 bg-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50 transform transition hover:scale-105"
+              >
                 View Squad
               </button>
             </div>
@@ -1377,8 +1582,12 @@ function SocialPage({ userData }) {
                   player.rank === 3 ? 'bg-orange-400' :
                   'bg-gray-200'
                 }`}>
-                  {player.rank}
+                  {player.rank === 1 && <Crown className="w-5 h-5 text-white" />}
+                  {player.rank === 2 && <Medal className="w-5 h-5 text-white" />}
+                  {player.rank === 3 && <Award className="w-5 h-5 text-white" />}
+                  {player.rank > 3 && player.rank}
                 </div>
+                <div className="text-2xl">{player.avatar}</div>
                 <div>
                   <p className="font-semibold">{player.name}</p>
                   <p className="text-sm text-gray-600">Level {player.level}</p>
