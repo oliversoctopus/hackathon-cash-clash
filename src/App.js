@@ -815,7 +815,7 @@ function MoneyMatchGame({ userData, setUserData }) {
   const [gameComplete, setGameComplete] = useState(false);
 
   // Initialize shuffled scenarios
-  useState(() => {
+  useEffect(() => {
     const shuffled = [...allScenarios].sort(() => Math.random() - 0.5).slice(0, 6);
     setScenarios(shuffled);
   }, []);
@@ -825,7 +825,7 @@ function MoneyMatchGame({ userData, setUserData }) {
     setShowResult(true);
     
     const correct = scenarios[currentCard].correct === direction;
-    setResults([...results, {
+    setResults(prev => [...prev, {
       scenario: scenarios[currentCard].scenario,
       correct: correct,
       userChoice: direction,
@@ -840,9 +840,8 @@ function MoneyMatchGame({ userData, setUserData }) {
       setUserChoice(null);
     } else {
       setGameComplete(true);
-      // Fix: Calculate final score correctly (don't add current card twice)
-      const correctCount = results.filter(r => r.correct).length + (scenarios[currentCard].correct === userChoice ? 1 : 0);
-      const finalScore = correctCount * 100;
+      // Calculate final score based on results array which now has all answers
+      const finalScore = results.filter(r => r.correct).length * 100;
       setUserData(prev => ({
         ...prev,
         totalXP: prev.totalXP + finalScore,
@@ -865,9 +864,7 @@ function MoneyMatchGame({ userData, setUserData }) {
     return <div>Loading...</div>;
   }
 
-  // Fix: Include the last card's result in the count
-  const correctCount = results.filter(r => r.correct).length + 
-    (showResult && userChoice === scenarios[currentCard].correct ? 1 : 0);
+  const correctCount = results.filter(r => r.correct).length;
   const totalScore = correctCount * 100;
 
   if (gameComplete) {
@@ -1314,7 +1311,7 @@ function InvestingGame({ userData, setUserData }) {
             </div>
           )}
 
-          {year >= 10 && xpAwarded && (
+          {year >= 10 && earnedXP > 0 && (
             <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 rounded-lg">
               <p className="text-sm font-semibold text-green-800">🎉 XP Earned!</p>
               <p className="text-sm text-green-700">
