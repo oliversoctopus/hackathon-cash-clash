@@ -18,9 +18,9 @@ export default function App() {
 
   const navigation = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'budget', label: 'Budget', icon: DollarSign },
-    { id: 'moneymatch', label: 'Match', icon: Target },
-    { id: 'investing', label: 'Invest', icon: TrendingUp },
+    { id: 'budget', label: 'Budget Builder', icon: DollarSign },
+    { id: 'moneymatch', label: 'Money Match', icon: Target },
+    { id: 'investing', label: 'Invest Sim', icon: TrendingUp },
     { id: 'social', label: 'Squads', icon: Users },
   ];
 
