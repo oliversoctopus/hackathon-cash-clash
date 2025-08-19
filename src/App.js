@@ -18,9 +18,9 @@ export default function App() {
 
   const navigation = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'budget', label: 'Budget Builder', icon: DollarSign },
-    { id: 'moneymatch', label: 'Money Match', icon: Target },
-    { id: 'investing', label: 'Invest Sim', icon: TrendingUp },
+    { id: 'budget', label: 'Budget', icon: DollarSign },
+    { id: 'moneymatch', label: 'Match', icon: Target },
+    { id: 'investing', label: 'Invest', icon: TrendingUp },
     { id: 'social', label: 'Squads', icon: Users },
   ];
 
@@ -46,40 +46,40 @@ export default function App() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-teal-200">
         <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-teal-700">Cash Clash</h1>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-orange-500" />
-              <span className="font-semibold">{userData.streakDays} day streak</span>
+          <h1 className="text-xl sm:text-2xl font-bold text-teal-700">Cash Clash</h1>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500" />
+              <span className="font-semibold text-sm sm:text-base">{userData.streakDays} day streak</span>
             </div>
-            <div className="bg-teal-100 px-3 py-1 rounded-full">
-              <span className="text-sm font-medium">Level {userData.level}</span>
+            <div className="bg-teal-100 px-2 sm:px-3 py-1 rounded-full">
+              <span className="text-xs sm:text-sm font-medium">Level {userData.level}</span>
             </div>
-            <div className="bg-purple-100 px-3 py-1 rounded-full">
+            <div className="bg-purple-100 px-2 sm:px-3 py-1 rounded-full hidden sm:block">
               <span className="text-sm font-medium">{userData.totalXP} XP</span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Navigation */}
-      <nav className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex space-x-1">
+      {/* Navigation - Fixed for Mobile */}
+      <nav className="bg-white border-b sticky top-0 z-10 overflow-x-auto">
+        <div className="max-w-6xl mx-auto px-2 sm:px-4">
+          <div className="flex min-w-max sm:min-w-0">
             {navigation.map(item => {
               const Icon = item.icon;
               return (
                 <button
                   key={item.id}
                   onClick={() => setCurrentPage(item.id)}
-                  className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors ${
+                  className={`flex items-center justify-center sm:justify-start gap-1 sm:gap-2 px-3 sm:px-4 py-3 font-medium transition-colors flex-1 whitespace-nowrap ${
                     currentPage === item.id 
                       ? 'text-teal-600 border-b-2 border-teal-600' 
                       : 'text-gray-600 hover:text-teal-600'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
-                  {item.label}
+                  <span className="text-xs sm:text-base">{item.label}</span>
                 </button>
               );
             })}
@@ -88,7 +88,7 @@ export default function App() {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-6xl mx-auto px-4 py-4 sm:py-8">
         {renderPage()}
       </main>
     </div>
@@ -122,49 +122,49 @@ function HomePage({ userData, setCurrentPage }) {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       {/* Welcome Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">
+      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-4">
           Welcome back, {userData.username}! 🚀
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
           Ready to level up your financial skills? Choose a game to start earning XP!
         </p>
         
         {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Total XP</p>
-            <p className="text-2xl font-bold text-blue-700">{userData.totalXP}</p>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-2 sm:p-4 rounded-lg">
+            <p className="text-xs sm:text-sm text-gray-600">Total XP</p>
+            <p className="text-lg sm:text-2xl font-bold text-blue-700">{userData.totalXP}</p>
           </div>
-          <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Current Level</p>
-            <p className="text-2xl font-bold text-green-700">{userData.level}</p>
+          <div className="bg-gradient-to-r from-green-50 to-green-100 p-2 sm:p-4 rounded-lg">
+            <p className="text-xs sm:text-sm text-gray-600">Current Level</p>
+            <p className="text-lg sm:text-2xl font-bold text-green-700">{userData.level}</p>
           </div>
-          <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Streak Days</p>
-            <p className="text-2xl font-bold text-orange-700">{userData.streakDays}</p>
+          <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-2 sm:p-4 rounded-lg">
+            <p className="text-xs sm:text-sm text-gray-600">Streak Days</p>
+            <p className="text-lg sm:text-2xl font-bold text-orange-700">{userData.streakDays}</p>
           </div>
         </div>
       </div>
 
       {/* Games Section */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         {games.map(game => {
           const Icon = game.icon;
           return (
             <div
               key={game.id}
               onClick={() => setCurrentPage(game.id)}
-              className="bg-white rounded-xl shadow-lg p-6 cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
+              className="bg-white rounded-xl shadow-lg p-4 sm:p-6 cursor-pointer transform transition-all hover:scale-105 hover:shadow-xl"
             >
-              <div className={`${game.color} w-16 h-16 rounded-full flex items-center justify-center mb-4`}>
-                <Icon className="w-8 h-8 text-white" />
+              <div className={`${game.color} w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-3 sm:mb-4`}>
+                <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-2">{game.title}</h3>
-              <p className="text-gray-600 mb-4">{game.description}</p>
-              <button className="flex items-center gap-2 text-teal-600 font-semibold">
+              <h3 className="text-lg sm:text-xl font-bold mb-2">{game.title}</h3>
+              <p className="text-xs sm:text-base text-gray-600 mb-3 sm:mb-4">{game.description}</p>
+              <button className="flex items-center gap-2 text-teal-600 font-semibold text-sm sm:text-base">
                 Play Now <ChevronRight className="w-4 h-4" />
               </button>
             </div>
