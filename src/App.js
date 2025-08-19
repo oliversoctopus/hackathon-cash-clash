@@ -62,7 +62,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* Navigation - Fixed for Mobile */}
+      {/* Navigation - Mobile Responsive with Full Labels */}
       <nav className="bg-white border-b sticky top-0 z-10 overflow-x-auto">
         <div className="max-w-6xl mx-auto px-2 sm:px-4">
           <div className="flex min-w-max sm:min-w-0">
@@ -72,13 +72,13 @@ export default function App() {
                 <button
                   key={item.id}
                   onClick={() => setCurrentPage(item.id)}
-                  className={`flex items-center justify-center sm:justify-start gap-1 sm:gap-2 px-3 sm:px-4 py-3 font-medium transition-colors flex-1 whitespace-nowrap ${
+                  className={`flex items-center justify-center sm:justify-start gap-1 sm:gap-2 px-2 sm:px-4 py-3 font-medium transition-colors flex-1 whitespace-nowrap ${
                     currentPage === item.id 
                       ? 'text-teal-600 border-b-2 border-teal-600' 
                       : 'text-gray-600 hover:text-teal-600'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4 flex-shrink-0" />
                   <span className="text-xs sm:text-base">{item.label}</span>
                 </button>
               );
