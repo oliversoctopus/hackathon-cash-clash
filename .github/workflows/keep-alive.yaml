@@ -11,7 +11,8 @@ on:
 jobs:
   ping-apps:
     runs-on: ubuntu-latest
-      
+    
+    steps:
       - name: Ping Vercel App
         run: |
           echo "Pinging Vercel app..."
